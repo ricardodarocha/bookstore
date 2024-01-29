@@ -1,0 +1,60 @@
+#!/bin/bash
+
+set -e
+
+if [[ -z "$WILL_DELETE_DB" ]]; then
+  echo nao rode esse comando em producao porque ele vai deletar o conteudo da tabela tabelasociodep
+  echo se esta rodando num db de testes, sete a variavel de ambiente WILL_DELETE_DB
+  echo
+  echo assim: WILL_DELETE_DB=1 ./run-tests
+  exit 1
+fi
+
+. ./.env
+
+mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD <<EOF
+use proto;
+truncate tabelasociodep;
+insert into tabelasociodep (id, titulo, nome, tipo, cpf, nascimento, sexo, telefone, senha, email, statussocio)
+values
+('aaaaa', 'Sr.',  'Um',   'tipo', '12345678901234', '2020-01-01', 'M',    '12345678901234', 'senha1', 'email1@a.b', 'status1'),
+('bbbbb', 'null', 'null', 'null', 'null',           '2022-01-01', 'null', 'null',           'senha2', 'email2@a.b', 'status2');
+
+EOF
+
+runcurl() {
+  set -x
+  curl -X PUT -H "Content-Type: application/json" -d "$2" "http://127.0.0.1:8080/sociodep/$1"
+  { set +x; } 2>/dev/null
+}
+
+mytest() {
+  local json="$(runcurl "$1" "$2")"
+
+  echo
+
+  if [[ "$json" = "$3" ]]; then
+    echo $json .. ok
+  else
+    echo $json .. fail "($3 expected)"
+  fi
+
+  echo
+}
+
+{ set -e; }
+
+# usuario nao existe, retorna erro
+mytest 'a' '{}' '{"error":"an internal server error occurred"}'
+
+# o json passado está vazio, não altera nada
+mytest 'aaaaa' '{}' '{"id":"aaaaa","titulo":"Sr.","nome":"Um","tipo":"tipo","cpf":"12345678901234","nascimento":[2020,1],"sexo":"M","telefone":"12345678901234","senha":"senha1","email":"email1@a.b","statussocio":"status1"}'
+
+# muda o nome do id aaaaa para "Qqqq"
+mytest 'aaaaa' '{"nome": "Qqqq"}' '{"id":"aaaaa","titulo":"Sr.","nome":"Qqqq","tipo":"tipo","cpf":"12345678901234","nascimento":[2020,1],"sexo":"M","telefone":"12345678901234","senha":"senha1","email":"email1@a.b","statussocio":"status1"}'
+
+# json vazio, nao altera nada
+mytest 'bbbbb' '{}' '{"id":"bbbbb","titulo":"null","nome":"null","tipo":"null","cpf":"null","nascimento":[2022,1],"sexo":"null","telefone":"null","senha":"senha2","email":"email2@a.b","statussocio":"status2"}'
+
+# muda o nome do id bbbbb para "otro", e o telefone para "qq". anteriormente eles eram NULL
+mytest 'bbbbb' '{"tipo": "otro", "telefone": "qq"}' '{"id":"bbbbb","titulo":"null","nome":"null","tipo":"otro","cpf":"null","nascimento":[2022,1],"sexo":"null","telefone":"qq","senha":"senha2","email":"email2@a.b","statussocio":"status2"}'
