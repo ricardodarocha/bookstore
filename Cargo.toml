@@ -1,9 +1,9 @@
 [package]
-name = "axum-patch"
-version = "0.1.0"
+name = "summerapi"
+version = "0.1.1"
 edition = "2021"
 authors = ["Ricardo da Rocha <ricardodarocha@outlook.com>", "Célio Caneschi <caneschi@sistemais.com.br>"]
-description = "Acessa a api do Summer"
+description = "Implementa api para conexão com o Banco de Dados Summer na Nuvem via driver MySQL. Implementado com Rust"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

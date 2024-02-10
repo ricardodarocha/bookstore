@@ -232,28 +232,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "axum-patch"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "axum-extra",
- "base64",
- "chrono",
- "clap",
- "dotenvy",
- "eyre",
- "jsonwebtoken",
- "once_cell",
- "serde",
- "serde_json",
- "serde_with",
- "sqlx",
- "thiserror",
- "tokio",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1914,6 +1892,28 @@ name = "subtle"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
+
+[[package]]
+name = "summerapi"
+version = "0.1.1"
+dependencies = [
+ "anyhow",
+ "axum",
+ "axum-extra",
+ "base64",
+ "chrono",
+ "clap",
+ "dotenvy",
+ "eyre",
+ "jsonwebtoken",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "sqlx",
+ "thiserror",
+ "tokio",
+]
 
 [[package]]
 name = "syn"
