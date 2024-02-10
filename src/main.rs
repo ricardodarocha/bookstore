@@ -26,7 +26,7 @@ async fn main() -> eyre::Result<()> {
     .route("/sociodep", post(sociodep_post)) //Insert 
     .route("/sociodep", get(sociodep_get_all)) //Select all
     .route("/sociodep/:id", get(sociodep_get)) //Select one
-    // .route("/sociodep/:id", put(sociodep_put)) //Update
+    .route("/sociodep/:id", put(sociodep_put)) //Update
     .layer(Extension(db));
 
 

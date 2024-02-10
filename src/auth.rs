@@ -1,20 +1,13 @@
-
-
-use jsonwebtoken::{encode, decode, EncodingKey,  DecodingKey, Validation, Algorithm, Header};
+use serde_json::json;
+use chrono::Utc;
+use jsonwebtoken::{encode, decode, EncodingKey, DecodingKey, Validation, Algorithm, Header};
 use serde::{Deserialize, Serialize};
-use axum::{
-    async_trait, extract::FromRequestParts, http::{request::Parts, StatusCode}, response::{IntoResponse, Response}, Json, RequestPartsExt
-};
-
-use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
-    TypedHeader,
-};
+use axum::{async_trait, extract::FromRequestParts, Json, RequestPartsExt};
+use axum::http::{request::Parts, StatusCode};
+use axum::response::{IntoResponse, Response};
+use axum_extra::{headers::{authorization::Bearer, Authorization},  TypedHeader,};
 
 use once_cell::sync::Lazy;
-use serde_json::json;
-
-use chrono::Utc;
 
 struct Keys {
     encoding: EncodingKey,
@@ -83,8 +76,8 @@ pub async fn authorize(Json(payload): Json<AuthPayload>) -> Result<Json<AuthBody
         .timestamp();
 
     let claims = AuthenticatedUser {
-        sub: "b@b.com".to_owned(),
-        company: "ACME".to_owned(),
+        sub: "caneschi@sistemais.com.br".to_owned(),
+        company: "Sistemais".to_owned(),
         exp: expiration as usize, // 24hs
     };
     // Create the authorization token
@@ -148,3 +141,4 @@ where
         Ok(token_data.claims)
         }
     }
+

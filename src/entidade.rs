@@ -1,8 +1,8 @@
+use chrono::NaiveDate;
 pub use eyre::{bail,Result}; //WrapErr
 
 //use crate::prelude::*;
 
-use time::Date;
 use serde::{Deserialize,Serialize};
 
 use sqlx::{MySqlPool, Transaction};
@@ -16,7 +16,7 @@ pub struct SelectSocioDep {
   nome: Option<String>,
   tipo: Option<String>,
   cpf: Option<String>,
-  nascimento: Option<Date>,
+  nascimento: Option<NaiveDate>,
   sexo: Option<String>,
   telefone: Option<String>,
 
@@ -39,7 +39,7 @@ pub struct MergeSocioDep {
   nome: Option<String>,
   tipo: Option<String>,
   cpf: Option<String>,
-  nascimento: Option<Date>,
+  nascimento: Option<NaiveDate>,
   sexo: Option<String>,
   telefone: Option<String>,
   senha: Option<String>,
@@ -59,7 +59,7 @@ pub struct InsertSocioDep {
   nome: Option<String>,
   tipo: Option<String>,
   cpf: Option<String>,
-  nascimento: Option<Date>,
+  nascimento: Option<NaiveDate>,
   sexo: Option<String>,
   telefone: Option<String>,
   senha: Option<String>,
@@ -69,8 +69,8 @@ pub struct InsertSocioDep {
 }
 
 impl SelectSocioDep {
-    pub async fn read(db: &MySqlPool, id: String) -> Result<Self> {
-        let tabela = sqlx::query_as!(SelectSocioDep, "select * from tabelasociodep where id = ?", id).fetch_one(db).await?;
+    pub async fn read(db: &MySqlPool, id: i32) -> Result<Self> {
+        let tabela = sqlx::query_as!(SelectSocioDep, "select * from tabelasociodep where codigosocio = ?", id).fetch_one(db).await?;
 
         Ok(tabela)
     }
@@ -81,7 +81,7 @@ impl SelectSocioDep {
         Ok(tabela)
     }
 
-    pub async fn write(&self, db: &MySqlPool) -> Result<()> {
+    pub async fn update(&self, db: &MySqlPool) -> Result<()> {
         let linhas = sqlx::query!("update tabelasociodep set
             titulo = ?,
             nome = ?,
@@ -94,7 +94,7 @@ impl SelectSocioDep {
             email = ?,
             statussocio = ?
 
-            where id = ?",
+            where codigosocio = ?",
             self.titulo,
             self.nome,
             self.tipo,
@@ -106,12 +106,12 @@ impl SelectSocioDep {
             self.email,
             self.statussocio,
 
-            self.id,
+            self.codigosocio,
         ).execute(db).await?
         .rows_affected();
 
         if linhas != 1 {
-          bail!("nothing was updated at id {:?}", self.id);
+          bail!("nothing was updated at id {:?}", self.codigosocio);
         }
 
         Ok(())
@@ -174,14 +174,18 @@ impl InsertSocioDep {
         ).execute(&mut *tx).await?
         .rows_affected();
 
-      
+        let ultimo_id: (i32,) = sqlx::query_as("SELECT CAST(LAST_INSERT_ID() AS SIGNED) AS last_insert_id")
+        .fetch_one(&mut *tx)
+        .await?;
+
+
         tx.commit().await?;
 
         if linhas != 1 {
-          bail!("nothing was updated at id {:?}", self.id);
+          bail!("Não foi possivel inserir um novo registro {:?}", self.id);
         };
 
-        let result = SelectSocioDep::read(db, self.id.clone().unwrap()); 
+        let result = SelectSocioDep::read(db, ultimo_id.0); 
         
 
         result.await

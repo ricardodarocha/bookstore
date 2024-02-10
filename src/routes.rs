@@ -15,7 +15,7 @@ pub async fn login(payload: Json<AuthPayload>) -> impl IntoResponse {
 
 
 #[debug_handler]
-pub async fn sociodep_put(db: Extension<MySqlPool>, Path(id): Path<String>, user: AuthenticatedUser, Json(payload): Json<MergeSocioDep>) -> Result<Json<SelectSocioDep>> where  Result<Json<SelectSocioDep>>: axum::response::IntoResponse {
+pub async fn sociodep_put(db: Extension<MySqlPool>, Path(id): Path<i32>, user: AuthenticatedUser, Json(payload): Json<MergeSocioDep>) -> Result<Json<SelectSocioDep>> where  Result<Json<SelectSocioDep>>: axum::response::IntoResponse {
     let mut socio = dbg!(SelectSocioDep::read(&db, id).await?);
     let payload = dbg!(payload);
 
@@ -23,7 +23,7 @@ pub async fn sociodep_put(db: Extension<MySqlPool>, Path(id): Path<String>, user
 
     dbg!(&socio);
 
-    socio.write(&db).await?;
+    socio.update(&db).await?;
 
     Ok(Json(socio))
 }
@@ -35,12 +35,10 @@ pub async fn sociodep_post(db: Extension<MySqlPool>, user: AuthenticatedUser, Js
 
     dbg!(&socio);
 
-    socio.write(&db).await?;
-
     Ok(Json(socio))
 }
 
-pub async fn sociodep_get(db: Extension<MySqlPool>, Path(id): Path<String>, user: AuthenticatedUser) -> Result<Json<SelectSocioDep>> where  Result<Json<SelectSocioDep>>: axum::response::IntoResponse {
+pub async fn sociodep_get(db: Extension<MySqlPool>, Path(id): Path<i32>, user: AuthenticatedUser) -> Result<Json<SelectSocioDep>> where  Result<Json<SelectSocioDep>>: axum::response::IntoResponse {
     let socio = dbg!(SelectSocioDep::read(&db, id).await?);
     dbg!(&socio);
     Ok(Json(socio))
